@@ -5,42 +5,40 @@ void Grid::randomizeGrid() {
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> dis(0, 1);
 
-	for (auto &cell : grid) {
+	for (auto &cell : grid[currentRow]) {
 		cell = dis(gen);
 	}
 }
 
 void Grid::setToZero() {
-	int size = grid.size();
-
-	if (size == 0) return;
-
-	for (int i = 0; i < size; i++) {
-		grid[i] = 0;
+	for (int i = 0; i < gridWidth; i++) {
+		grid[currentRow][i] = 0;
 	}
-	int middleIndex = size / 2;
-	grid[middleIndex] = 1;
+	int middleIndex = gridWidth / 2;
+	grid[currentRow][middleIndex] = 1;
 }
 
-int Grid::checkNeighbor(int x, int y) {
+int Grid::checkNeighbor(int x, int prevRow) {
+	// Get the states of the three cells above
+	int left = (x > 0) ? grid[prevRow][x - 1] : 0;
+	int center = grid[prevRow][x];
+	int right = (x < gridWidth - 1) ? grid[prevRow][x + 1] : 0;
 
-	int count = 0;
+	// Convert the three cells into a binary number (0-7)
+	int pattern = (left << 2) | (center << 1) | right;
 
-	int left = (x - 1 >= 0) ? grid[y * gridWidth + (x - 1)] : 0; // Left neighbor, default 0 if out of bounds
-	int center = grid[y * gridWidth + x]; // Current cell
-	int right = (x + 1 < gridWidth) ? grid[y * gridWidth + (x + 1)] : 0; // Right neighbor, default 0 if out of bounds
-
-
-	if (left == 1 && center == 1 && right == 1) return 1;
-	if (left == 1 && center == 1 && right == 0) return 0;
-	if (left == 1 && center == 0 && right == 1) return 1;
-	if (left == 1 && center == 0 && right == 0) return 1;
-	if (left == 0 && center == 1 && right == 1) return 0;
-	if (left == 0 && center == 1 && right == 0) return 0;
-	if (left == 0 && center == 0 && right == 1) return 1;
-	if (left == 0 && center == 0 && right == 0) return 0;
-
-	return 0;
+	// Rule 30 lookup table
+	switch (pattern) {
+	case 0b111: return 0;
+	case 0b110: return 0;
+	case 0b101: return 0;
+	case 0b100: return 1;
+	case 0b011: return 1;
+	case 0b010: return 1;
+	case 0b001: return 1;
+	case 0b000: return 0;
+	default: return 0;
+	}
 }
 
 void Grid::drawCell(int x, int y, Rectangle& cell) {
@@ -48,7 +46,7 @@ void Grid::drawCell(int x, int y, Rectangle& cell) {
 	cell.y = static_cast<float>(y * cell_size);
 
 	
-	int result = checkNeighbor(x, y);
+	int result = grid[y][x];
 
 	if (result == 0) {
 		DrawRectangleRec(cell, DARKGRAY);
@@ -60,7 +58,7 @@ void Grid::drawCell(int x, int y, Rectangle& cell) {
 
 void Grid::drawGrid() {
 	Rectangle cell = { 0, 0, static_cast<float>(cell_size), static_cast<float>(cell_size) };
-	for (int y = 0; y < currentRow; y++) {
+	for (int y = 0; y <= currentRow; y++) {
 		for (int x = 0; x < gridWidth; x++) {
 			drawCell(x, y, cell);
 		}
@@ -68,7 +66,12 @@ void Grid::drawGrid() {
 }
 
 void Grid::incrementRow() {
-	if (currentRow < gridHeight) {
+	if (currentRow < gridHeight - 1) {
 		currentRow++;
+	}
+
+	// create the next generation based on the current one
+	for (int x = 0; x < gridWidth; x++) {
+		grid[currentRow][x] = checkNeighbor(x, currentRow - 1);
 	}
 }

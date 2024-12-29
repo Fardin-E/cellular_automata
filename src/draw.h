@@ -2,16 +2,19 @@
 
 class Grid {
 private:
-	std::vector<int> grid;
-	const float cell_size = 20.0f;
-	const int gridWidth = 21;
-	const int gridHeight = 21;
+	std::vector<std::vector<int>> grid;
+	const float cell_size;
+	const int gridWidth;
+	const int gridHeight;
 	int currentRow = 0;
 public:
-	Grid() {
-		grid.resize(gridWidth * gridHeight);
-		randomizeGrid();
+	Grid(int width, int height, int cellSize)
+		: gridWidth(width), gridHeight(height),
+		cell_size(cellSize), currentRow(0) 
+	{
+		grid.resize(gridHeight, std::vector<int>(gridWidth));
 	}
+
 	void randomizeGrid();
 	void setToZero();
 	void drawCell(int x, int y, Rectangle& cell);

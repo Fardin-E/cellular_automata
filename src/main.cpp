@@ -8,7 +8,8 @@ int main() {
 	InitWindow(screenWidth, screenHeight, "Window");
 	SetTargetFPS(20);
 
-	Grid grid;
+	Grid grid(21, 21, 20.0f);
+	grid.setToZero();
 
 	while (!WindowShouldClose()) {
 		// Update
