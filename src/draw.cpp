@@ -25,20 +25,20 @@ int Grid::checkNeighbor(int x, int prevRow) {
 	int right = (x < gridWidth - 1) ? grid[prevRow][x + 1] : 0;
 
 	// Convert the three cells into a binary number (0-7)
-	int pattern = (left << 2) | (center << 1) | right;
+	int pattern = (left * 4) | (center * 2) + right;
 
-	// Rule 30 lookup table
-	switch (pattern) {
-	case 0b111: return 0;
-	case 0b110: return 0;
-	case 0b101: return 0;
-	case 0b100: return 1;
-	case 0b011: return 1;
-	case 0b010: return 1;
-	case 0b001: return 1;
-	case 0b000: return 0;
-	default: return 0;
-	}
+	// ruleset
+	int rule = 110;
+	
+	/*
+	* example: 
+	* rule = 30 (00011110)
+	* pattern = 6
+	* rule >> pattern = 00011110 >> 6 = 00000000
+	* 00000000 & 1 = 0 (returns 0)
+	* the & 1 at the end checks the rightmost bit
+	*/
+	return (rule >> pattern) & 1;
 }
 
 void Grid::drawCell(int x, int y, Rectangle& cell) {
@@ -46,13 +46,13 @@ void Grid::drawCell(int x, int y, Rectangle& cell) {
 	cell.y = static_cast<float>(y * cell_size);
 
 	
-	int result = grid[y][x];
+	int cellBox = grid[y][x];
 
-	if (result == 0) {
-		DrawRectangleRec(cell, DARKGRAY);
+	if (cellBox == 0) {
+		DrawRectangleRec(cell, LIGHTGRAY);
 	}
 	else {
-		DrawRectangleRec(cell, LIGHTGRAY);
+		DrawRectangleRec(cell, DARKGRAY);
 	}
 }
 
