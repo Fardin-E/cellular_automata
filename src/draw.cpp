@@ -28,7 +28,7 @@ int Grid::checkNeighbor(int x, int prevRow) {
 	int pattern = (left * 4) | (center * 2) + right;
 
 	// ruleset
-	int rule = 110;
+	int rule = 30;
 	
 	/*
 	* example: 
